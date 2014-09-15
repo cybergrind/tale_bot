@@ -1,4 +1,3 @@
-
 def xfile(afile, globalz=None, localz=None):
     with open(afile, "r") as fh:
         exec(fh.read(), globalz, localz)
@@ -8,3 +7,4 @@ try:
 except Exception as mess:
     print(mess)
 
+import tale.log
