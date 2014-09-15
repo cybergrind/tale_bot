@@ -62,7 +62,7 @@ class Game(object):
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
             return
 
-        durabilities = filter(lambda x: x[0] < 0.99, map(self.get_durability, BUILDINGS))
+        durabilities = list(filter(lambda x: x[0] < 0.99, map(self.get_durability, BUILDINGS)))
         durabilities.sort()
 
         for building in cycle(BUILDINGS):
@@ -86,6 +86,7 @@ class Game(object):
         self.log.debug('POST: {}'.format(url))
         resp = self.post(url, {})
         self.log.info('Building fix resp: {}'.format(resp))
+        time.sleep(30) # async op dirty hack
         self.get_info()
 
     def get_durability(self, coord):
