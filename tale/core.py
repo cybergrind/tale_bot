@@ -17,6 +17,9 @@ URL = 'http://the-tale.org'
 BUILDINGS = ['x=31&y=39',
              'x=33&y=39']
 
+# minimal amount for building
+BUILD_ENERGY_MIN = 8
+
 
 class Game(object):
     log = logging.getLogger('Game')
@@ -50,7 +53,7 @@ class Game(object):
         resp = self.get_info()
         #print('Energy: {}'.format(self.energy))
         #print('IS ALIVE: {}'.format(self.is_alive))
-        if not self.is_alive and self.energy > 3:
+        if not self.is_alive:
             url = '{}/game/abilities/help/api/use?{}'.format(URL, self.vsn(1.0))
             resp = self.post(url, {})
             self.log.warning('Ressurect: {}'.format(resp))
@@ -58,14 +61,14 @@ class Game(object):
 
     def check_buildings(self):
         self.get_info()
-        if self.energy < 6:
+        if self.energy < BUILD_ENERGY_MIN:
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
             return
 
         durabilities = list(filter(lambda x: x[0] < 0.99, map(self.get_durability, BUILDINGS)))
         durabilities.sort()
 
-        for building in cycle(BUILDINGS):
+        for building in durabilities:
             dur, bid = self.get_durability(building)
             self.log.debug('Integrity: {} BID: {}'.format(dur, bid))
             if dur >= 0.99:
@@ -75,7 +78,7 @@ class Game(object):
                 return
             else:
                 self.fix_building(bid)
-            if self.energy < 6:
+            if self.energy < BUILD_ENERGY_MIN:
                 msg = 'Low energy: {}. Skip building fix'.format(self.energy)
                 self.log.debug(msg)
                 return
@@ -97,7 +100,7 @@ class Game(object):
         integrity = re.match(regex, resp, re.DOTALL).groups()[0]
         regex = '.*data-building-id="(.*?)".*'
         bid = re.match(regex, resp, re.DOTALL).groups()[0]
-        return float(integrity), int(bid)
+        return (float(integrity), int(bid))
 
 
     def login(self):
