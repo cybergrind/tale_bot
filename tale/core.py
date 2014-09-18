@@ -67,9 +67,9 @@ class Game(object):
 
         durabilities = list(filter(lambda x: x[0] < 0.99, map(self.get_durability, BUILDINGS)))
         durabilities.sort()
-
+        self.log.debug('Sorted: {}'.format(durabilities))
         for building in durabilities:
-            dur, bid = self.get_durability(building)
+            dur, bid, coord = self.get_durability(building[2])
             self.log.debug('Integrity: {} BID: {}'.format(dur, bid))
             if dur >= 0.99:
                 self.log.debug('Do recursive')
@@ -100,7 +100,8 @@ class Game(object):
         integrity = re.match(regex, resp, re.DOTALL).groups()[0]
         regex = '.*data-building-id="(.*?)".*'
         bid = re.match(regex, resp, re.DOTALL).groups()[0]
-        return (float(integrity), int(bid))
+        self.log.debug('Int: {}'.format(integrity))
+        return (float(integrity), int(bid), coord)
 
 
     def login(self):
