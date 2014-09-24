@@ -17,6 +17,8 @@ URL = 'http://the-tale.org'
 BUILDINGS = ['x=31&y=39',
              'x=33&y=39']
 
+MIN_PERCENT = 1 - 0.0179
+
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
 
@@ -65,13 +67,13 @@ class Game(object):
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
             return
 
-        durabilities = list(filter(lambda x: x[0] < 0.99, map(self.get_durability, BUILDINGS)))
+        durabilities = list(filter(lambda x: x[0] < MIN_PERCENT, map(self.get_durability, BUILDINGS)))
         durabilities.sort()
         self.log.debug('Sorted: {}'.format(durabilities))
         for building in durabilities:
             dur, bid, coord = self.get_durability(building[2])
             self.log.debug('Integrity: {} BID: {}'.format(dur, bid))
-            if dur >= 0.99:
+            if dur >= MIN_PERCENT:
                 self.log.debug('Do recursive')
                 self.check_buildings()
                 self.log.debug('After recursive return')
@@ -138,7 +140,7 @@ class Game(object):
                      'csrftoken=%s;sessionid=%s'\
                      %(csrf, self.private['sessionid']))
         r.add_header('X-CSRFToken', csrf)
-        uo = urlopen(r, post_data)
+        uo = urlopen(r, post_data, timeout=30)
         #print(dir(uo))
         #print(uo.getheaders())
         j = uo.read().decode('utf8')
@@ -156,7 +158,7 @@ class Game(object):
                      'csrftoken=%s;sessionid=%s'\
                      %(csrf, self.private['sessionid']))
         r.add_header('X-CSRFToken', csrf)
-        uo = urlopen(r)
+        uo = urlopen(r, timeout=30)
         #print(dir(uo))
         #print(uo.getheaders())
         j = uo.read().decode('utf8')
