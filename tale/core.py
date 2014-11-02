@@ -21,6 +21,7 @@ MIN_PERCENT = 1 - 0.0179
 
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
+PLAYER_ENERY_MIN = 12
 
 
 class Game(object):
@@ -46,6 +47,7 @@ class Game(object):
             try:
                 self.check_if_death()
                 self.check_buildings()
+                self.check_player_help()
             except Exception as e:
                 print('Got exception: {}'.format(e))
             finally:
@@ -84,6 +86,21 @@ class Game(object):
                 msg = 'Low energy: {}. Skip building fix'.format(self.energy)
                 self.log.debug(msg)
                 return
+
+    def check_player_help(self):
+        self.get_info()
+        if self.energy < PLAYER_ENERY_MIN:
+            return
+        self.player_help()
+
+    def player_help(self):
+        pat = '{}/game/abilities/help/api/use?{}'
+        url = pat.format(URL, self.vsn(1.0))
+        self.log.debug('Player help')
+        resp = self.post(url, {})
+        self.log.info('Player help {}'.format(resp))
+        time.sleep(30)
+        self.get_info()
 
     def fix_building(self, bid):
         pat = '{}/game/abilities/building_repair/api/use?building={}&{}'
