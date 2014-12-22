@@ -17,11 +17,11 @@ URL = 'http://the-tale.org'
 BUILDINGS = ['x=31&y=39',
              'x=33&y=39']
 
-MIN_PERCENT = 1 - 0.0179
+MIN_PERCENT = 1 - 0.0179*2
 
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
-PLAYER_ENERY_MIN = 12
+PLAYER_ENERGY_MIN = 8
 
 
 class Game(object):
@@ -89,7 +89,7 @@ class Game(object):
 
     def check_player_help(self):
         self.get_info()
-        if self.energy < PLAYER_ENERY_MIN:
+        if self.energy < PLAYER_ENERGY_MIN:
             return
         self.player_help()
 
