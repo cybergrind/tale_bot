@@ -14,14 +14,14 @@ from tale.settings import CREDS, SESSION_FILE
 
 
 URL = 'http://the-tale.org'
-BUILDINGS = ['x=31&y=39',
-             'x=33&y=39']
+BUILDINGS = ['x=31&y=46',
+             'x=33&y=46']
 
 MIN_PERCENT = 1 - 0.0179*2
 
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
-PLAYER_ENERGY_MIN = 8
+PLAYER_ENERGY_MIN = 10
 
 
 class Game(object):
@@ -115,6 +115,7 @@ class Game(object):
         self.log.debug('try durability')
         url = '{}/game/map/cell-info?{}'.format(URL, coord)
         resp = self.get(url)
+        #self.log.debug('Get resp: {}'.format(resp))
         regex = '.*data-building-integrity="(.*?)".*'
         integrity = re.match(regex, resp, re.DOTALL).groups()[0]
         regex = '.*data-building-id="(.*?)".*'
