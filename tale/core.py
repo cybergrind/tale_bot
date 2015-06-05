@@ -6,7 +6,6 @@ import time
 import logging
 
 
-from itertools import cycle
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
@@ -26,6 +25,7 @@ PLAYER_ENERGY_MIN = 10
 
 class Game(object):
     log = logging.getLogger('Game')
+
     def __init__(self):
         self.connected = False
         self.private = {'sessionid': ''}
@@ -55,8 +55,8 @@ class Game(object):
 
     def check_if_death(self):
         resp = self.get_info()
-        #print('Energy: {}'.format(self.energy))
-        #print('IS ALIVE: {}'.format(self.is_alive))
+        # print('Energy: {}'.format(self.energy))
+        # print('IS ALIVE: {}'.format(self.is_alive))
         if not self.is_alive:
             url = '{}/game/abilities/help/api/use?{}'.format(URL, self.vsn(1.0))
             resp = self.post(url, {})
@@ -69,7 +69,8 @@ class Game(object):
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
             return
 
-        durabilities = list(filter(lambda x: x[0] < MIN_PERCENT, map(self.get_durability, BUILDINGS)))
+        durabilities = list(filter(lambda x: x[0] < MIN_PERCENT,
+                                   map(self.get_durability, BUILDINGS)))
         durabilities.sort()
         self.log.debug('Sorted: {}'.format(durabilities))
         for building in durabilities:
@@ -108,26 +109,26 @@ class Game(object):
         self.log.debug('POST: {}'.format(url))
         resp = self.post(url, {})
         self.log.info('Building fix resp: {}'.format(resp))
-        time.sleep(30) # async op dirty hack
+        time.sleep(30)  # async op dirty hack
         self.get_info()
 
     def get_durability(self, coord):
         self.log.debug('try durability')
         url = '{}/game/map/cell-info?{}'.format(URL, coord)
         resp = self.get(url)
-        #self.log.debug('Get resp: {}'.format(resp))
-        regex = '.*data-building-integrity="(.*?)".*'
+        # self.log.debug('Get resp: {}'.format(resp))
+        # regex = '.*data-building-integrity="(.*?)".*'
+        regex = '.*"pgf-building-integrity"\>(.*?)%\<.*'
         integrity = re.match(regex, resp, re.DOTALL).groups()[0]
         regex = '.*data-building-id="(.*?)".*'
         bid = re.match(regex, resp, re.DOTALL).groups()[0]
         self.log.debug('Int: {}'.format(integrity))
         return (float(integrity), int(bid), coord)
 
-
     def login(self):
         url = '{}/accounts/auth/api/login?{}'.format(URL, self.vsn(1.0))
         resp, headers = self.post(url, CREDS, return_headers=True)
-        cookie = list(filter(lambda x: x[0]=='Set-Cookie', headers))[1][1]
+        cookie = list(filter(lambda x: x[0] == 'Set-Cookie', headers))[1][1]
         self.log.info('Cookie {} \nResp {}'.format(cookie, resp))
         self.private['sessionid'] = re.match('sessionid=(.*?);.*', cookie).groups()[0]
         self.private.update(resp['data'])
@@ -144,7 +145,6 @@ class Game(object):
     def vsn(self, v):
         return 'api_version={}&api_client=tb-test'.format(v)
 
-
     def check_sessionid(self):
         self.log.info('Check session')
         self.get_info()
@@ -152,17 +152,17 @@ class Game(object):
     def post(self, url, data, return_headers=False):
         csrf = str(uuid.uuid4()).replace('-', '')
         post_data = urlencode(data).encode('utf8')
-        #print(post_data)
+        # print(post_data)
         r = Request(url)
         r.add_header('Cookie',
-                     'csrftoken=%s;sessionid=%s'\
-                     %(csrf, self.private['sessionid']))
+                     'csrftoken=%s;sessionid=%s'
+                     % (csrf, self.private['sessionid']))
         r.add_header('X-CSRFToken', csrf)
         uo = urlopen(r, post_data, timeout=30)
-        #print(dir(uo))
-        #print(uo.getheaders())
+        # print(dir(uo))
+        # print(uo.getheaders())
         j = uo.read().decode('utf8')
-        #print(j)
+        # print(j)
         j = json.loads(j)
         if return_headers:
             return (j, uo.getheaders())
@@ -173,14 +173,14 @@ class Game(object):
         csrf = str(uuid.uuid4()).replace('-', '')
         r = Request(url)
         r.add_header('Cookie',
-                     'csrftoken=%s;sessionid=%s'\
-                     %(csrf, self.private['sessionid']))
+                     'csrftoken=%s;sessionid=%s'
+                     % (csrf, self.private['sessionid']))
         r.add_header('X-CSRFToken', csrf)
         uo = urlopen(r, timeout=30)
-        #print(dir(uo))
-        #print(uo.getheaders())
+        # print(dir(uo))
+        # print(uo.getheaders())
         j = uo.read().decode('utf8')
-        #print(j)
+        # print(j)
         try:
             j = json.loads(j)
         except Exception:
