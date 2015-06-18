@@ -4,6 +4,8 @@ import os
 import re
 import time
 import logging
+import sys
+from bs4 import BeautifulSoup as bs
 
 
 from urllib.request import urlopen, Request
@@ -22,6 +24,14 @@ MIN_PERCENT = 1 - 0.0179*2
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
 
+LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
+EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
+
+SHOP_LIMITS = {
+    LEG_URL: 90,
+    EPC_URL: 50,
+}
+
 
 class Game(object):
     log = logging.getLogger('Game')
@@ -29,6 +39,12 @@ class Game(object):
     def __init__(self):
         self.connected = False
         self.private = {'sessionid': ''}
+        self.log.info(sys.argv)
+        if len(sys.argv) >= 2 and sys.argv[1] == 'buy':
+            self.buy_mode = True
+        else:
+            self.buy_mode = False
+        self.log.info('Buy mode is enabled: {}'.format(self.buy_mode))
         self.init()
 
     def init(self):
@@ -48,10 +64,36 @@ class Game(object):
                 self.check_if_death()
                 self.check_buildings()
                 self.check_player_help()
+                if self.buy_mode:
+                    self.check_buy()
             except Exception as e:
                 print('Got exception: {}'.format(e))
             finally:
                 time.sleep(60)
+
+    def check_buy(self):
+        for url, limit in SHOP_LIMITS.items():
+            self.check_section(url, limit)
+
+    def check_section(self, url, limit):
+        r = bs(self.get(url))
+        tr = r.find_all(id='pgf-help-accordion')[0].table.tbody.tr
+        card, price, lnk = self.check_price(tr)
+        if price < limit:
+            self.log.info('Buy card: {}'.format(card))
+            s = self.post(lnk, {})
+            self.log.info('Ret: {}'.format(s))
+        else:
+            self.log.info('No cards with available limits')
+
+    def check_price(self, tr):
+        desc = tr.td.span.text.strip()
+        ps = tr.td.next_sibling.next_sibling
+        p = int(ps.string.strip())
+        a = ps.next_sibling.next_sibling.next_sibling.next_sibling.a['href']
+        a = '{}{}'.format(URL, a)
+        self.log.info('{} => {}'.format(desc, p))
+        return (desc, p, a)
 
     def check_if_death(self):
         resp = self.get_info()
