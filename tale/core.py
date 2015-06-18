@@ -26,10 +26,12 @@ PLAYER_ENERGY_MIN = 10
 
 LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
 EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
+RAR_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-2'
 
 SHOP_LIMITS = {
     LEG_URL: 90,
-    EPC_URL: 50,
+    EPC_URL: 60,
+    RAR_URL: 20,
 }
 
 
