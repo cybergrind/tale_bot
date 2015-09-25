@@ -11,28 +11,9 @@ from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
-from tale.settings import CREDS, SESSION_FILE
-
-
-URL = 'http://the-tale.org'
-BUILDINGS = ['x=31&y=46',
-             'x=33&y=46']
-
-MIN_PERCENT = 1 - 0.0179*2
-
-# minimal amount for building
-BUILD_ENERGY_MIN = 8
-PLAYER_ENERGY_MIN = 10
-
-LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
-EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
-RAR_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-2'
-
-SHOP_LIMITS = {
-    LEG_URL: 90,
-    EPC_URL: 60,
-    RAR_URL: 20,
-}
+from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT,
+                           BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN,
+                           SHOP_LIMITS, URL, BUILDINGS)
 
 
 class Game(object):
