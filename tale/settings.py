@@ -10,8 +10,8 @@ EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
 RAR_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-2'
 
 SHOP_LIMITS = {
-    LEG_URL: 90,
-    EPC_URL: 60,
+    LEG_URL: 85,
+    EPC_URL: 55,
     RAR_URL: 20,
 }
 
