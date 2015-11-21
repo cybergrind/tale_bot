@@ -16,6 +16,7 @@ from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT, HELP_IN_BATTLE,
                            BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN, MAX_HELPS_IN_ROW,
                            SHOP_LIMITS, URL, BUILDINGS, CARD_FARMING_MIN)
 
+INACTIVE_TYPE = 0
 BATTLE_TYPE = 3
 
 ARTIFACT_TYPE_DUMP = 0
@@ -57,7 +58,7 @@ class Game(object):
                     self.check_buy()
             except Exception as e:
                 print('Got exception: {}'.format(e))
-                self.log.execption('Got exception: {}'.format(e))
+                self.log.exception('Got exception: {}'.format(e))
             finally:
                 time.sleep(30)
 
@@ -119,6 +120,11 @@ class Game(object):
                 msg = 'Low energy: {}. Skip building fix'.format(self.energy)
                 self.log.debug(msg)
                 return
+
+    def check_inactivity(self):
+        if self.current_action == INACTIVE_TYPE:
+            self.log.info('Kick incative hero')
+            self.player_help(fast=True)
 
     @property
     def farm_energy(self):
@@ -209,10 +215,12 @@ class Game(object):
         if self.current_action != BATTLE_TYPE:
             self.log.debug('Skip bag checking, not in battle')
             return
-        if len(bag.values()) < 2:
-            self.log.debug('Skip bag cleaning, less than 2 items')
+        bag_values = list(filter(lambda x: x['type'] == ARTIFACT_TYPE_DUMP, bag.values()))
+        if len(bag_values) < 3:
+            self.log.debug('Skip bag cleaning, less than 3 items')
             return
-        for artifact in bag.values():
+        self.log.debug('Perform bag cleaning')
+        for artifact in bag_values[:2]:
             if self.farm_energy > 3 and artifact['type'] == ARTIFACT_TYPE_DUMP:
                 self.drop_item()
 
@@ -240,6 +248,7 @@ class Game(object):
     def get_info(self):
         resp = self.update_info()
         self.check_bag(self.hero['bag'])
+        self.check_inactivity()
         self.card_engine.update(self.hero['cards'])
         self.log.debug('Hero info: {}'.format(self.hero))
         return resp
