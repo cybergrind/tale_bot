@@ -4,7 +4,7 @@ MIN_PERCENT = 1 - 0.0179*17
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
-CARD_FARMING_MIN = 8100
+CARD_FARMING_MIN = 8000
 HELP_IN_BATTLE = False
 
 DESIRED_CARDS = {
@@ -19,6 +19,8 @@ DESIRED_CARDS = {
     92: {'rarity': 2},  # + companion
     93: {'rarity': 3},  # + compoanion
     94: {'rarity': 4},  # + compoanion
+    98: {'rarity': 1},  # reset all skills
+    49: {'rarity': 1},  # + item
 }
 
 LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
