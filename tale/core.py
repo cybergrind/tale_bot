@@ -233,7 +233,7 @@ class Game(object):
             self.log.debug('Skip bag cleaning, less than 3 items')
             return
         self.log.debug('Perform bag cleaning')
-        for artifact in bag_values[:2]:
+        for artifact in bag_values[:-2]:
             if self.farm_energy > 3 and artifact['type'] == ARTIFACT_TYPE_DUMP:
                 self.drop_item()
 
