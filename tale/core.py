@@ -13,10 +13,12 @@ from urllib.parse import urlencode
 
 from tale.card_engine import CardEngine
 from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT, HELP_IN_BATTLE,
-                           BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN,
+                           BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN, MAX_HELPS_IN_ROW,
                            SHOP_LIMITS, URL, BUILDINGS, CARD_FARMING_MIN)
 
 BATTLE_TYPE = 3
+
+ARTIFACT_TYPE_DUMP = 0
 
 
 class Game(object):
@@ -56,7 +58,7 @@ class Game(object):
             except Exception as e:
                 print('Got exception: {}'.format(e))
             finally:
-                time.sleep(60)
+                time.sleep(30)
 
     def check_buy(self):
         for url, limit in SHOP_LIMITS.items():
@@ -90,7 +92,7 @@ class Game(object):
             url = '{}/game/abilities/help/api/use?{}'.format(URL, self.vsn(1.0))
             resp = self.post(url, {})
             self.log.warning('Ressurect: {}'.format(resp))
-            self.get_info()
+            self.update_info()
 
     def check_buildings(self):
         self.get_info()
@@ -117,13 +119,22 @@ class Game(object):
                 self.log.debug(msg)
                 return
 
+    @property
+    def farm_energy(self):
+        return self.energy_bonus - CARD_FARMING_MIN
+
+    @property
+    def current_action(self):
+        return self.hero['action']['type']
+
     def check_player_help(self):
         self.get_info()
-        if not HELP_IN_BATTLE and self.hero['action']['type'] == BATTLE_TYPE:
+        if not HELP_IN_BATTLE and self.current_action == BATTLE_TYPE:
             self.log.debug('Skip help because in BATTLE')
             return
-        if self.energy_bonus > CARD_FARMING_MIN:
-            num = min(4, (CARD_FARMING_MIN-self.energy)/4)
+        if self.farm_energy > 4:
+            num = min(MAX_HELPS_IN_ROW, self.farm_energy/4)
+            self.log.debug('Perform {} helps'.format(num))
             for i in range(num):
                 self.player_help(fast=True)
 
@@ -137,8 +148,8 @@ class Game(object):
         self.log.debug('Player help')
         resp = self.post(url, {})
         self.log.info('Player help {}'.format(resp))
-        time.sleep(3 if fast else 30)
-        self.get_info()
+        time.sleep(3 if fast else 15)
+        self.update_info()
 
     def get_card(self):
         # class='pgf-get-card-button'
@@ -164,7 +175,7 @@ class Game(object):
         self.log.debug('POST: {}'.format(url))
         resp = self.post(url, {})
         self.log.info('Building fix resp: {}'.format(resp))
-        time.sleep(30)  # async op dirty hack
+        time.sleep(15)  # async op dirty hack
         self.get_info()
 
     def get_durability(self, coord):
@@ -190,16 +201,43 @@ class Game(object):
         with open(SESSION_FILE, 'w') as f:
             json.dump(self.private, f)
 
-    def get_info(self):
+    def check_bag(self, bag):
+        if self.farm_energy < 3:
+            self.log.debug('Skip bag checking, not enough energy')
+            return
+        if self.current_action != BATTLE_TYPE:
+            self.log.debug('Skip bag checking, not in battle')
+            return
+        for artifact in bag.values():
+            if self.farm_energy > 3 and artifact['type'] == ARTIFACT_TYPE_DUMP:
+                self.drop_item()
+
+    def drop_item(self):
+        # /game/abilities/drop_item/api/use?api_version=1.0&api_client=the_tale-v0.3.20.2
+        pat = '{}/game/abilities/drop_item/api/use?{}'
+        url = pat.format(URL, self.vsn(1.0))
+        self.log.debug('Before drop item')
+        resp = self.post(url, {})
+        self.log.debug('Drop item resp: {}'.format(resp))
+        time.sleep(5)
+        self.update_info()
+
+    def update_info(self):
         url = '{}/game/api/info?{}'.format(URL, self.vsn(1.3))
         resp = self.get(url)
+        self.last_resp = resp
         hero = resp['data']['account']['hero']
         self.hero = hero
         self.energy = hero['energy']['value']
         self.energy_bonus = hero['energy']['bonus']
         self.is_alive = hero['base']['alive']
-        self.card_engine.update(hero['cards'])
-        self.log.debug('Hero info: {}'.format(hero))
+        return resp
+
+    def get_info(self):
+        resp = self.update_info()
+        self.check_bag(self.hero['bag'])
+        self.card_engine.update(self.hero['cards'])
+        self.log.debug('Hero info: {}'.format(self.hero))
         return resp
 
     def vsn(self, v, additional={}):
