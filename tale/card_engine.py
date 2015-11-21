@@ -82,7 +82,7 @@ class CardEngine(object):
     def update(self, cards):
         self.cards = cards
         self.update_cards_info()
-        self.card_ready = cards['help_count'] > cards['help_barrier']
+        self.card_ready = cards['help_count'] >= cards['help_barrier']
         self.check_combine()
         self.check_get_card()
 
