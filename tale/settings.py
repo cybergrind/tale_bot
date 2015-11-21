@@ -5,6 +5,8 @@ MIN_PERCENT = 1 - 0.0179*17
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
 CARD_FARMING_MIN = 8200
+HELP_IN_PVP = False
+
 DESIRED_CARDS = {
     1: {'rarity': 4},  # + level
     8: {'rarity': 3},  # + energy 640

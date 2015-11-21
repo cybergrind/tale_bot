@@ -12,9 +12,11 @@ from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
 from tale.card_engine import CardEngine
-from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT,
+from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT, HELP_IN_PVP,
                            BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN,
                            SHOP_LIMITS, URL, BUILDINGS, CARD_FARMING_MIN)
+
+PVP_TYPE = 3
 
 
 class Game(object):
@@ -117,6 +119,8 @@ class Game(object):
 
     def check_player_help(self):
         self.get_info()
+        if not HELP_IN_PVP and self.hero['action']['type'] == PVP_TYPE:
+            return
         if self.energy_bonus > CARD_FARMING_MIN:
             num = min(4, (CARD_FARMING_MIN-self.energy)/4)
             for i in range(num):
