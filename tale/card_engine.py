@@ -1,14 +1,18 @@
 import logging
 import json
+import random
 import os
 from functools import reduce
 
-from tale.settings import DESIRED_CARDS
+from tale.settings import (DESIRED_CARDS, CARD_ROLL_RATE, CARD_ROLL_LEVELS)
 from tale.items import ITEMS
 
 
 FILE = 'items.json'
-MAX_COMBINE = 3
+MAX_COMBINE_RARITY = 3
+
+NEED_FOR_ROLL = 2
+NEED_FOR_COMBINE = 3
 
 
 class CardEngine(object):
@@ -49,7 +53,7 @@ class CardEngine(object):
         if card['type'] in DESIRED_CARDS:
             return acc
         r = card['rarity']
-        if r > MAX_COMBINE:
+        if r >= MAX_COMBINE_RARITY:
             return acc
         if r not in acc:
             acc[r] = []
@@ -61,8 +65,16 @@ class CardEngine(object):
         by_lvl = reduce(self.reduce_filter, self.cards['cards'], {})
         self.log.debug('BY LEVEL: {}'.format(by_lvl))
         for lvl, uids in by_lvl.items():
-            if len(uids) > 2:
-                self.api.combine_cards(uids[:3])
+            if len(uids) < NEED_FOR_COMBINE:
+                continue
+
+            if (lvl in CARD_ROLL_LEVELS and len(uids) >= NEED_FOR_ROLL and
+               random.random() < CARD_ROLL_RATE):
+                self.log.info('Roll new card of level {}'.format(lvl))
+                self.api.combind_cards(uids[:NEED_FOR_ROLL])
+            else:
+                self.log.info('Roll card of new level {}+1'.format(lvl))
+                self.api.combine_cards(uids[:NEED_FOR_COMBINE])
 
     def update(self, cards):
         self.cards = cards

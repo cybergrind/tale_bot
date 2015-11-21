@@ -4,10 +4,12 @@ MIN_PERCENT = 1 - 0.0179*17
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
-CARD_FARMING_MIN = 8000
 HELP_IN_BATTLE = False
 MAX_HELPS_IN_ROW = 6
 
+CARD_FARMING_MIN = 8000
+CARD_ROLL_RATE = 0.70  # if proc: combine 2 instead of 3 cards
+CARD_ROLL_LEVELS = [2]  # we want rares
 DESIRED_CARDS = {
     1: {'rarity': 4},  # + level
     8: {'rarity': 3},  # + energy 640

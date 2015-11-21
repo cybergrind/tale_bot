@@ -57,6 +57,7 @@ class Game(object):
                     self.check_buy()
             except Exception as e:
                 print('Got exception: {}'.format(e))
+                self.log.execption('Got exception: {}'.format(e))
             finally:
                 time.sleep(30)
 
@@ -73,7 +74,7 @@ class Game(object):
             s = self.post(lnk, {})
             self.log.info('Ret: {}'.format(s))
         else:
-            self.log.info('No cards with available limits')
+            self.log.debug('No cards with available limits')
 
     def check_price(self, tr):
         desc = tr.td.span.text.strip()
@@ -81,7 +82,7 @@ class Game(object):
         p = int(ps.string.strip())
         a = ps.next_sibling.next_sibling.next_sibling.next_sibling.a['href']
         a = '{}{}'.format(URL, a)
-        self.log.info('{} => {}'.format(desc, p))
+        self.log.debug('{} => {}'.format(desc, p))
         return (desc, p, a)
 
     def check_if_death(self):
@@ -91,11 +92,10 @@ class Game(object):
         if not self.is_alive:
             url = '{}/game/abilities/help/api/use?{}'.format(URL, self.vsn(1.0))
             resp = self.post(url, {})
-            self.log.warning('Ressurect: {}'.format(resp))
+            self.log.info('Ressurect: {}'.format(resp))
             self.update_info()
 
     def check_buildings(self):
-        self.get_info()
         if self.energy < BUILD_ENERGY_MIN:
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
             return
@@ -114,6 +114,7 @@ class Game(object):
                 return
             else:
                 self.fix_building(bid)
+                self.update_info()
             if self.energy < BUILD_ENERGY_MIN:
                 msg = 'Low energy: {}. Skip building fix'.format(self.energy)
                 self.log.debug(msg)
@@ -133,8 +134,8 @@ class Game(object):
             self.log.debug('Skip help because in BATTLE')
             return
         if self.farm_energy > 4:
-            num = min(MAX_HELPS_IN_ROW, self.farm_energy/4)
-            self.log.debug('Perform {} helps'.format(num))
+            num = min(MAX_HELPS_IN_ROW, self.farm_energy//4)
+            self.log.info('Perform {} helps'.format(num))
             for i in range(num):
                 self.player_help(fast=True)
 
@@ -158,7 +159,7 @@ class Game(object):
         url = pat.format(URL, self.vsn(1.0))
         self.log.debug('Before get card')
         resp = self.post(url, {})
-        self.log.debug('Get card resp: {}'.format(resp))
+        self.log.info('Get card resp: {}'.format(resp))
 
     def combine_cards(self, ids):
         # /game/cards/api/combine?api_client=the_tale-v0.3.20.2&api_version=1.0&cards=369,370,352
@@ -167,7 +168,7 @@ class Game(object):
         url = pat.format(URL, self.vsn(1.0, {'cards': ids}))
         self.log.debug('Before combine cards: {}'.format(ids))
         resp = self.post(url, {})
-        self.log.debug('Combine cards resp: {}'.format(resp))
+        self.log.info('Combine cards resp: {}'.format(resp))
 
     def fix_building(self, bid):
         pat = '{}/game/abilities/building_repair/api/use?building={}&{}'
@@ -208,6 +209,9 @@ class Game(object):
         if self.current_action != BATTLE_TYPE:
             self.log.debug('Skip bag checking, not in battle')
             return
+        if len(bag.values()) < 2:
+            self.log.debug('Skip bag cleaning, less than 2 items')
+            return
         for artifact in bag.values():
             if self.farm_energy > 3 and artifact['type'] == ARTIFACT_TYPE_DUMP:
                 self.drop_item()
@@ -218,7 +222,7 @@ class Game(object):
         url = pat.format(URL, self.vsn(1.0))
         self.log.debug('Before drop item')
         resp = self.post(url, {})
-        self.log.debug('Drop item resp: {}'.format(resp))
+        self.log.info('Drop item resp: {}'.format(resp))
         time.sleep(5)
         self.update_info()
 
