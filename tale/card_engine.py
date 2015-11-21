@@ -43,7 +43,11 @@ class CardEngine(object):
     def update_cards_info(self):
         for card in self.cards['cards']:
             t = card['type']
-            if not self.items[t].get('rarity'):
+            if t not in self.items:
+                v = {'rarity': card['rarity'], 'name': card['name']}
+                self.log.info('Add not tracked card: {}'.format(card))
+                self.update_items(t, v)
+            elif not self.items[t].get('rarity'):
                 v = self.items[t]
                 v['rarity'] = card['rarity']
                 self.update_items(t, v)
@@ -68,8 +72,7 @@ class CardEngine(object):
             if len(uids) < NEED_FOR_COMBINE:
                 continue
 
-            if (lvl in CARD_ROLL_LEVELS and len(uids) >= NEED_FOR_ROLL and
-               random.random() < CARD_ROLL_RATE):
+            if (lvl in CARD_ROLL_LEVELS and random.random() < CARD_ROLL_RATE):
                 self.log.info('Roll new card of level {}'.format(lvl))
                 self.api.combind_cards(uids[:NEED_FOR_ROLL])
             else:

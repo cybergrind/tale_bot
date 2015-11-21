@@ -134,16 +134,27 @@ class Game(object):
     def current_action(self):
         return self.hero['action']['type']
 
+    @property
+    def help_allowed(self):
+        if HELP_IN_BATTLE:
+            return True
+        else:
+            return self.current_action != BATTLE_TYPE
+
     def check_player_help(self):
         self.get_info()
-        if not HELP_IN_BATTLE and self.current_action == BATTLE_TYPE:
-            self.log.debug('Skip help because in BATTLE')
+        if not self.help_allowed:
+            self.log.debug('Skip help because not allowed')
             return
         if self.farm_energy > 4:
             num = min(MAX_HELPS_IN_ROW, self.farm_energy//4)
-            self.log.info('Perform {} helps'.format(num))
+            self.log.info('Can perform {} helps'.format(num))
             for i in range(num):
-                self.player_help(fast=True)
+                if self.help_allowed:
+                    self.player_help(fast=True)
+                else:
+                    self.log.debug('Skip help, not allowed')
+                    break
 
         if self.energy < PLAYER_ENERGY_MIN:
             return
@@ -166,6 +177,7 @@ class Game(object):
         self.log.debug('Before get card')
         resp = self.post(url, {})
         self.log.info('Get card resp: {}'.format(resp))
+        time.sleep(6)
 
     def combine_cards(self, ids):
         # /game/cards/api/combine?api_client=the_tale-v0.3.20.2&api_version=1.0&cards=369,370,352
@@ -175,6 +187,7 @@ class Game(object):
         self.log.debug('Before combine cards: {}'.format(ids))
         resp = self.post(url, {})
         self.log.info('Combine cards resp: {}'.format(resp))
+        time.sleep(6)
 
     def fix_building(self, bid):
         pat = '{}/game/abilities/building_repair/api/use?building={}&{}'
@@ -231,7 +244,7 @@ class Game(object):
         self.log.debug('Before drop item')
         resp = self.post(url, {})
         self.log.info('Drop item resp: {}'.format(resp))
-        time.sleep(5)
+        time.sleep(6)
         self.update_info()
 
     def update_info(self):
