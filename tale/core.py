@@ -11,9 +11,10 @@ from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
+from tale.card_engine import CardEngine
 from tale.settings import (CREDS, SESSION_FILE, MIN_PERCENT,
                            BUILD_ENERGY_MIN, PLAYER_ENERGY_MIN,
-                           SHOP_LIMITS, URL, BUILDINGS)
+                           SHOP_LIMITS, URL, BUILDINGS, CARD_FARMING_MIN)
 
 
 class Game(object):
@@ -27,6 +28,7 @@ class Game(object):
             self.buy_mode = True
         else:
             self.buy_mode = False
+        self.card_engine = CardEngine(api=self)
         self.log.info('Buy mode is enabled: {}'.format(self.buy_mode))
         self.init()
 
@@ -59,7 +61,7 @@ class Game(object):
             self.check_section(url, limit)
 
     def check_section(self, url, limit):
-        r = bs(self.get(url))
+        r = bs(self.get(url), 'lxml')
         tr = r.find_all(id='pgf-help-accordion')[0].table.tbody.tr
         card, price, lnk = self.check_price(tr)
         if price < limit:
@@ -115,18 +117,41 @@ class Game(object):
 
     def check_player_help(self):
         self.get_info()
+        if self.energy_bonus > CARD_FARMING_MIN:
+            num = min(4, (CARD_FARMING_MIN-self.energy)/4)
+            for i in range(num):
+                self.player_help(fast=True)
+
         if self.energy < PLAYER_ENERGY_MIN:
             return
         self.player_help()
 
-    def player_help(self):
+    def player_help(self, fast=False):
         pat = '{}/game/abilities/help/api/use?{}'
         url = pat.format(URL, self.vsn(1.0))
         self.log.debug('Player help')
         resp = self.post(url, {})
         self.log.info('Player help {}'.format(resp))
-        time.sleep(30)
+        time.sleep(3 if fast else 30)
         self.get_info()
+
+    def get_card(self):
+        # class='pgf-get-card-button'
+        # POST: http://the-tale.org/game/cards/api/get?api_client=the_tale-v0.3.20.2&api_version=1.0
+        pat = '{}/game/cards/api/get?{}'
+        url = pat.format(URL, self.vsn(1.0))
+        self.log.debug('Before get card')
+        resp = self.post(url, {})
+        self.log.debug('Get card resp: {}'.format(resp))
+
+    def combine_cards(self, ids):
+        # /game/cards/api/combine?api_client=the_tale-v0.3.20.2&api_version=1.0&cards=369,370,352
+        pat = '{}/game/cards/api/combine?{}'
+        ids = ','.join(map(str, ids))
+        url = pat.format(URL, self.vsn(1.0, {'cards': ids}))
+        self.log.debug('Before combine cards: {}'.format(ids))
+        resp = self.post(url, {})
+        self.log.debug('Combine cards resp: {}'.format(resp))
 
     def fix_building(self, bid):
         pat = '{}/game/abilities/building_repair/api/use?building={}&{}'
@@ -161,14 +186,23 @@ class Game(object):
             json.dump(self.private, f)
 
     def get_info(self):
-        url = '{}/game/api/info?{}'.format(URL, self.vsn(1.1))
+        url = '{}/game/api/info?{}'.format(URL, self.vsn(1.3))
         resp = self.get(url)
-        self.energy = resp['data']['account']['hero']['energy']['value']
-        self.is_alive = resp['data']['account']['hero']['base']['alive']
+        hero = resp['data']['account']['hero']
+        self.hero = hero
+        self.energy = hero['energy']['value']
+        self.energy_bonus = hero['energy']['bonus']
+        self.is_alive = hero['base']['alive']
+        self.card_engine.update(hero['cards'])
+        self.log.debug('Hero info: {}'.format(hero))
         return resp
 
-    def vsn(self, v):
-        return 'api_version={}&api_client=tb-test'.format(v)
+    def vsn(self, v, additional={}):
+        opts = {'api_version': v,
+                'api_client': 'tb-test'}
+        if additional:
+            opts.update(additional)
+        return urlencode(opts)
 
     def check_sessionid(self):
         self.log.info('Check session')

@@ -4,6 +4,20 @@ MIN_PERCENT = 1 - 0.0179*17
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
+CARD_FARMING_MIN = 8200
+DESIRED_CARDS = {
+    1: {'rarity': 4},  # + level
+    8: {'rarity': 3},  # + energy 640
+    9: {'rarity': 4},  # + energy 2560
+    46: {'rarity': 3},  # + fix all arts
+    50: {'rarity': 2},  # rare item
+    97: {'rarity': 4},  # + experience
+    106: {'rarity': 3},  # item enchance
+    107: {'rarity': 4},  # + city help
+    92: {'rarity': 2},  # + companion
+    93: {'rarity': 3},  # + compoanion
+    94: {'rarity': 4},  # + compoanion
+}
 
 LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
 EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
