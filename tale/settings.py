@@ -4,8 +4,8 @@ MIN_PERCENT = 1 - 0.0179*17
 # minimal amount for building
 BUILD_ENERGY_MIN = 8
 PLAYER_ENERGY_MIN = 10
-CARD_FARMING_MIN = 8200
-HELP_IN_PVP = False
+CARD_FARMING_MIN = 8100
+HELP_IN_BATTLE = False
 
 DESIRED_CARDS = {
     1: {'rarity': 4},  # + level
