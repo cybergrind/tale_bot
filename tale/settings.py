@@ -26,6 +26,7 @@ DESIRED_CARDS = {
     93: {'rarity': 3},  # + companion
     94: {'rarity': 4},  # + companion
     98: {'rarity': 1},  # reset all skills
+    87: {'rarity': 4},  # exp to energy
 
 }
 AUTOUSE_CARDS = [1, 8, 9, 49, 50, 106, 97]
