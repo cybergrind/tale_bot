@@ -96,6 +96,15 @@ class Game(object):
             self.log.info('Ressurect: {}'.format(resp))
             self.update_info()
 
+    def use_card(self, card, params={}):
+        card_uid = card['uid']
+        url = '{}/game/cards/api/use?{}'.format(URL, self.vsn(1.0, {'card': card_uid}))
+        self.log.debug('Before use card: {}'.format(card))
+        resp = self.post(url, params)
+        self.log.info('Use card resp: {} => {}'.format(card, resp))
+        time.sleep(6)
+        self.update_info()
+
     def check_buildings(self):
         if self.energy < BUILD_ENERGY_MIN:
             self.log.debug('Low energy: {}. Skip building fix'.format(self.energy))
@@ -140,6 +149,11 @@ class Game(object):
             return True
         else:
             return self.current_action != BATTLE_TYPE
+
+    @property
+    def free_bag_slots(self):
+        s = self.hero['secondary']
+        return s['max_bag_size'] - s['loot_items_count']
 
     def check_player_help(self):
         self.get_info()

@@ -4,7 +4,8 @@ import random
 import os
 from functools import reduce
 
-from tale.settings import (DESIRED_CARDS, CARD_ROLL_RATE, CARD_ROLL_LEVELS)
+from tale.settings import (DESIRED_CARDS, CARD_ROLL_RATE, CARD_ROLL_LEVELS,
+                           AUTOUSE_CARDS)
 from tale.items import ITEMS
 
 
@@ -41,7 +42,7 @@ class CardEngine(object):
             self.api.get_card()
 
     def update_cards_info(self):
-        for card in self.cards['cards']:
+        for card in self.cards:
             t = card['type']
             if t not in self.items:
                 v = {'rarity': card['rarity'], 'name': card['name']}
@@ -57,18 +58,21 @@ class CardEngine(object):
         if card['type'] in DESIRED_CARDS:
             return acc
         r = card['rarity']
-        if r >= MAX_COMBINE_RARITY:
-            return acc
         if r not in acc:
             acc[r] = []
         acc[r].append(card['uid'])
         return acc
 
     def check_combine(self):
-        self.log.debug('Cards: {}'.format(self.cards['cards']))
-        by_lvl = reduce(self.reduce_filter, self.cards['cards'], {})
+        self.log.debug('Cards: {}'.format(self.cards))
+        by_lvl = reduce(self.reduce_filter, self.cards, {})
         self.log.debug('BY LEVEL: {}'.format(by_lvl))
         for lvl, uids in by_lvl.items():
+
+            if len(uids) >= NEED_FOR_ROLL and lvl > MAX_COMBINE_RARITY:
+                self.log.debug('Roll new card of legendary level')
+                self.api.combine_cards(uids[:NEED_FOR_ROLL])
+
             if len(uids) < NEED_FOR_COMBINE:
                 continue
 
@@ -80,11 +84,35 @@ class CardEngine(object):
                 self.api.combine_cards(uids[:NEED_FOR_COMBINE])
 
     def update(self, cards):
-        self.cards = cards
+        self.cards = cards['cards']
         self.update_cards_info()
         self.card_ready = cards['help_count'] >= cards['help_barrier']
         self.check_combine()
         self.check_get_card()
+        self.check_autouse()
+
+    def check_autouse(self):
+        for card in self.cards:
+            if card['type'] in AUTOUSE_CARDS:
+                self.use_card(card)
+
+    def have_bag_space(self):
+        return self.api.free_bag_slots > 2
+
+    use_card_requirements = {
+        49: 'have_bag_space',
+        50: 'have_bag_space'
+    }
+
+    def use_card(self, card):
+        t = card['type']
+        if t in self.use_card_requirements:
+            method = self.use_card_requirements[t]
+            if getattr(self, method)():
+                self.api.use_card(card)
+        else:
+            self.api.use_card(card)
+
 
     # {'cards': [{'auction': False, 'rarity': 4, 'type': 94, 'uid': 45, },
     #            {'auction': True, 'rarity': 2, 'type': 92, 'uid': 311}
