@@ -74,7 +74,7 @@ class CardEngine(object):
 
             if (lvl in CARD_ROLL_LEVELS and random.random() < CARD_ROLL_RATE):
                 self.log.info('Roll new card of level {}'.format(lvl))
-                self.api.combind_cards(uids[:NEED_FOR_ROLL])
+                self.api.combine_cards(uids[:NEED_FOR_ROLL])
             else:
                 self.log.info('Roll card of new level {}+1'.format(lvl))
                 self.api.combine_cards(uids[:NEED_FOR_COMBINE])
