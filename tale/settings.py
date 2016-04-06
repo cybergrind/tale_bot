@@ -56,8 +56,8 @@ RAR_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-2'
 
 SHOP_LIMITS = {
     LEG_URL: 85,
-    EPC_URL: 55,
-    RAR_URL: 20,
+    EPC_URL: 45,
+    RAR_URL: 15,
 }
 
 URL = 'http://the-tale.org'
