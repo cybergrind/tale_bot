@@ -7,12 +7,20 @@ HELP_IN_BATTLE = False
 MAX_HELPS_IN_ROW = 6
 
 CARD_FARMING_MIN = 8000
-CARD_ROLL_RATE = 0.10  # if proc: combine 2 instead of 3 cards
+CARD_ROLL_RATE = 0.03  # if proc: combine 2 instead of 3 cards
 CARD_ROLL_LEVELS = [1, 2, 3]  # we want rares
 DESIRED_CARDS = {
     1: {'rarity': 4},  # + level
+    5: {'rarity': 0},  # + energy 10
+    6: {'rarity': 1},  # + energy 40
+    7: {'rarity': 2},  # + energy 160
     8: {'rarity': 3},  # + energy 640
     9: {'rarity': 4},  # + energy 2560
+
+    30: {'rarity': 1},  # new fav town
+    31: {'rarity': 1},  # new friend
+    32: {'rarity': 1},  # new foe
+    36: {'rarity': 1},  # new fav item
 
     46: {'rarity': 3},  # + fix all arts
     49: {'rarity': 1},  # + item
@@ -28,8 +36,19 @@ DESIRED_CARDS = {
     98: {'rarity': 1},  # reset all skills
     87: {'rarity': 4},  # exp to energy
 
+    110: {'rarity': 0},  # town -1%
+    66: {'rarity': 1},  # -4%
+    67: {'rarity': 2},  # -16%
+    68: {'rarity': 3},  # -64%
+    69: {'rarity': 4},  # -256%
+
+    70: {'rarity': 1},  # help +1
+    71: {'rarity': 2},  # +4
+    72: {'rarity': 3},  # +16
+    73: {'rarity': 4},  # +64
+
 }
-AUTOUSE_CARDS = [1, 8, 9, 49, 50, 106, 97]
+AUTOUSE_CARDS = [1, 5, 6, 7, 8, 9]
 
 LEG_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-4'
 EPC_URL = 'http://the-tale.org/market/?order_by=0&group=cards-hero-good-3'
