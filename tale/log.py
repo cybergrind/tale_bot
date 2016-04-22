@@ -14,6 +14,6 @@ logging.root.setLevel(logging.DEBUG)
 logging.root.addHandler(debug_handler)
 
 
-g_handler = graypy.GELFHandler('192.168.88.33', 12201)
+g_handler = graypy.GELFHandler('192.168.88.33', 13001)
 g_handler.setFormatter(formatter)
 logging.root.addHandler(g_handler)
