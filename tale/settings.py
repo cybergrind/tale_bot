@@ -61,8 +61,7 @@ SHOP_LIMITS = {
 }
 
 URL = 'http://the-tale.org'
-BUILDINGS = ['x=31&y=46',
-             'x=33&y=46']
+BUILDINGS = ['x=31&y=46']
 
 
 

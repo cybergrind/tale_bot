@@ -219,9 +219,11 @@ class Game(object):
         # self.log.debug('Get resp: {}'.format(resp))
         # regex = '.*data-building-integrity="(.*?)".*'
         regex = '.*"pgf-building-integrity"\>(.*?)%\<.*'
-        integrity = re.match(regex, resp, re.DOTALL).groups()[0]
+        _i = re.findall(regex, resp, re.DOTALL)
+        integrity = _i[0] if _i else 100
         regex = '.*data-building-id="(.*?)".*'
-        bid = re.match(regex, resp, re.DOTALL).groups()[0]
+        _i = re.match(regex, resp, re.DOTALL).findall()
+        bid = _i[0] if _i else 0
         self.log.debug('Int: {}'.format(integrity))
         return (float(integrity), int(bid), coord)
 
