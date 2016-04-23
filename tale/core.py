@@ -222,7 +222,7 @@ class Game(object):
         _i = re.findall(regex, resp, re.DOTALL)
         integrity = _i[0] if _i else 100
         regex = '.*data-building-id="(.*?)".*'
-        _i = re.match(regex, resp, re.DOTALL).findall()
+        _i = re.findall(regex, resp, re.DOTALL)
         bid = _i[0] if _i else 0
         self.log.debug('Int: {}'.format(integrity))
         return (float(integrity), int(bid), coord)
