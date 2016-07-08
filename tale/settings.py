@@ -6,7 +6,7 @@ PLAYER_ENERGY_MIN = 10
 HELP_IN_BATTLE = False
 MAX_HELPS_IN_ROW = 6
 
-CARD_FARMING_MIN = 8000
+CARD_FARMING_MIN = 10000
 CARD_ROLL_RATE = 0.03  # if proc: combine 2 instead of 3 cards
 CARD_ROLL_LEVELS = [1, 2, 3]  # we want rares
 DESIRED_CARDS = {
