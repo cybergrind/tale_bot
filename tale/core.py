@@ -264,7 +264,7 @@ class Game(object):
         self.update_info()
 
     def update_info(self):
-        url = '{}/game/api/info?{}'.format(URL, self.vsn(1.3))
+        url = '{}/game/api/info?{}'.format(URL, self.vsn(1.5))
         resp = self.get(url)
         self.last_resp = resp
         hero = resp['data']['account']['hero']
