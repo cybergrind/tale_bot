@@ -230,7 +230,7 @@ class Game(object):
     def login(self):
         url = '{}/accounts/auth/api/login?{}'.format(URL, self.vsn(1.0))
         resp, headers = self.post(url, CREDS, return_headers=True)
-        cookie = list(filter(lambda x: x[0] == 'Set-Cookie', headers))[1][1]
+        cookie = list(filter(lambda x: (x[0] == 'Set-Cookie') and ('session' in x[1]), headers))[0][1]
         self.log.info('Cookie {} \nResp {}'.format(cookie, resp))
         self.private['sessionid'] = re.match('sessionid=(.*?);.*', cookie).groups()[0]
         self.private.update(resp['data'])
