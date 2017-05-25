@@ -47,6 +47,8 @@ DESIRED_CARDS = {
     72: {'rarity': 3},  # +16
     73: {'rarity': 4},  # +64
 
+    83: {'rarity': 2},  # TARDIS
+
 }
 AUTOUSE_CARDS = [1, 5, 6, 7, 8, 9]
 
