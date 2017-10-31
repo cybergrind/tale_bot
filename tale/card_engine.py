@@ -33,7 +33,7 @@ class CardEngine(object):
         self.save_items()
 
     def save_items(self):
-        i = json.dumps({str(x[0]): x[1] for x in self.items.items()})
+        i = json.dumps({str(x[0]): x[1] for x in self.items.items()}, indent=2)
         with open(FILE, 'w') as f:
             f.write(i)
 

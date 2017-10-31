@@ -52,7 +52,7 @@ class Game(object):
         while True:
             try:
                 self.check_if_death()
-                self.check_buildings()
+                # self.check_buildings()
                 self.check_player_help()
                 if self.buy_mode:
                     self.check_buy()
@@ -63,6 +63,7 @@ class Game(object):
                 time.sleep(30)
 
     def check_buy(self):
+        return
         for url, limit in SHOP_LIMITS.items():
             self.check_section(url, limit)
 
@@ -184,6 +185,7 @@ class Game(object):
         self.update_info()
 
     def get_card(self):
+        return
         # class='pgf-get-card-button'
         # POST: http://the-tale.org/game/cards/api/get?api_client=the_tale-v0.3.20.2&api_version=1.0
         pat = '{}/game/cards/api/get?{}'
@@ -235,11 +237,11 @@ class Game(object):
         self.private['sessionid'] = re.match('sessionid=(.*?);.*', cookie).groups()[0]
         self.private.update(resp['data'])
         with open(SESSION_FILE, 'w') as f:
-            json.dump(self.private, f)
+            json.dump(self.private, f, indent=2)
 
     def check_bag(self, bag):
-        if self.farm_energy < 3:
-            self.log.debug('Skip bag checking, not enough energy')
+        if self.energy < 20:
+            self.log.debug('Skip bag checking, not enough energy: {}'.format(self.energy))
             return
         if self.current_action != BATTLE_TYPE:
             self.log.debug('Skip bag checking, not in battle')
@@ -248,9 +250,9 @@ class Game(object):
         if len(bag_values) < 3:
             self.log.debug('Skip bag cleaning, less than 3 items')
             return
-        self.log.debug('Perform bag cleaning')
+        self.log.debug('Perform bag cleaning: {}'.format(bag_values))
         for artifact in bag_values[:-2]:
-            if self.farm_energy > 3 and artifact['type'] == ARTIFACT_TYPE_DUMP:
+            if self.energy > 30 and artifact['type'] == ARTIFACT_TYPE_DUMP:
                 self.drop_item()
 
     def drop_item(self):
@@ -279,6 +281,7 @@ class Game(object):
         self.check_bag(self.hero['bag'])
         self.check_inactivity()
         self.card_engine.update(self.hero['cards'])
+        self.log.debug('Hero info keys: {}'.format(self.hero.keys()))
         self.log.debug('Hero info: {}'.format(self.hero))
         return resp
 
